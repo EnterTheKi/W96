@@ -282,45 +282,387 @@ const TRACK_DURATION = 180000; // 3 minutes in milliseconds (adjust this based o
 // Add at the top with other variables
 let quoteRefreshInterval = null;
 
-// Add this at the very top of the file, before any other code
-document.addEventListener('DOMContentLoaded', function() {
-  // Ensure basic HTML structure exists
-  if (!document.body) {
-    console.error('Document body not found');
-    return;
+// Add typing animation function
+function typeWriter(element, text, speed = 50) {
+  let i = 0;
+  element.textContent = '';
+  
+  function type() {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    }
+  }
+  
+  type();
+}
+
+function renderArtistContent() {
+  let artistContent = document.getElementById('artist-content');
+  if (!artistContent) {
+    console.warn('Artist content element not found - creating one');
+    artistContent = document.createElement('div');
+    artistContent.id = 'artist-content';
+    document.body.appendChild(artistContent);
   }
 
-  // Create basic structure if it doesn't exist
-  const requiredStructure = `
-    <div id="loading-overlay" class="loading-overlay"></div>
-    <div id="system-status" class="system-status">
-      <div class="status-text"></div>
+  const isWindows96 = activeArtist === 'windows96';
+  const albums = isWindows96 ? windows96Albums : yvyyAlbums;
+
+  // Create background elements if they don't exist
+  let bgContainer = document.getElementById('background-elements');
+  if (!bgContainer) {
+    console.warn('Background container not found - creating one');
+    bgContainer = document.createElement('div');
+    bgContainer.id = 'background-elements';
+    document.body.insertBefore(bgContainer, document.body.firstChild);
+  }
+
+  // Create player bar if it doesn't exist
+  let playerBar = document.getElementById('player-bar');
+  if (!playerBar) {
+    console.warn('Player bar not found - creating one');
+    playerBar = document.createElement('div');
+    playerBar.id = 'player-bar';
+    playerBar.className = 'player-bar';
+    document.body.appendChild(playerBar);
+  }
+
+  const title = isWindows96 ? 'Windows96' : 'YVYY';
+  const subtitle = isWindows96 ? '' : '';
+  const randomQuote = isWindows96 
+    ? windows96Quotes[Math.floor(Math.random() * windows96Quotes.length)]
+    : "A sonic abyss of raw distortion, metaphysical chaos, and blackened rhythms. Embrace the void where industrial beats and existential dread converge.";
+
+  // Show notification for Windows96 quotes
+  if (isWindows96) {
+    showNotification('New quote loaded: ' + randomQuote.replace(/"/g, ''));
+  }
+
+  let heroHTML = `
+    <section class="hero-section">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex flex-col items-center text-center">
+          <!-- Artist Switching Buttons -->
+          <div class="artist-switcher mb-12 w-full max-w-2xl">
+            <div class="flex gap-6 justify-center">
+              <button onclick="setActiveArtist('windows96')" class="group relative flex-1 px-8 py-6 bg-black/40 text-white text-2xl font-bold rounded-xl transition-all duration-500 flex items-center justify-center gap-4 overflow-hidden border ${activeArtist === 'windows96' ? 'border-purple-500/50' : 'border-purple-500/20'} hover:border-purple-500/50">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 ${activeArtist === 'windows96' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent ${activeArtist === 'windows96' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
+                <svg class="w-8 h-8 text-purple-400 ${activeArtist === 'windows96' ? 'text-purple-300' : 'group-hover:text-purple-300'} transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" class="world-outline"/>
+                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" class="world-grid"/>
+                </svg>
+                <span class="relative z-10 ${activeArtist === 'windows96' ? 'text-white' : 'text-purple-200 group-hover:text-white'} transition-colors duration-300">Windows96</span>
+              </button>
+              <button onclick="setActiveArtist('yvyy')" class="group relative flex-1 px-8 py-6 bg-black/40 text-white text-2xl font-bold rounded-xl transition-all duration-500 flex items-center justify-center gap-4 overflow-hidden border ${activeArtist === 'yvyy' ? 'border-purple-500/50' : 'border-purple-500/20'} hover:border-purple-500/50">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 ${activeArtist === 'yvyy' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent ${activeArtist === 'yvyy' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
+                <svg class="w-8 h-8 text-purple-400 ${activeArtist === 'yvyy' ? 'text-purple-300' : 'group-hover:text-purple-300'} transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" class="moon-outline"/>
+                  <path d="M12 3v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M17 7l-1.4 1.4M5.6 18.4l1.4-1.4" class="moon-rays"/>
+                </svg>
+                <span class="relative z-10 ${activeArtist === 'yvyy' ? 'text-white' : 'text-purple-200 group-hover:text-white'} transition-colors duration-300">YVYY</span>
+              </button>
     </div>
-    <div id="background-elements"></div>
-    <div id="artist-content"></div>
-    <div id="player-bar" class="player-bar"></div>
+          </div>
+
+          <div class="world-icon-container mb-8">
+            ${isWindows96 ? `
+              <svg class="world-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" class="world-outline"/>
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" class="world-grid"/>
+                <path d="M12 2v20" class="world-grid"/>
+                <path d="M2 12h20" class="world-grid"/>
+              </svg>
+            ` : `
+              <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" class="moon-outline"/>
+                <path d="M12 3v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M17 7l-1.4 1.4M5.6 18.4l1.4-1.4" class="moon-rays"/>
+              </svg>
+            `}
+          </div>
+          <h2 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
+            <span class="block glitch" data-text="${title.toUpperCase()}">${title.toUpperCase()}</span>
+            <span class="text-xs uppercase tracking-[0.2em] mt-2 block album-subtitle">${subtitle}</span>
+          </h2>
+          <p class="description transition-opacity duration-500">${randomQuote}</p>
+          <div class="action-buttons flex flex-col gap-6 justify-center animate-fade-in-up delay-400">
+            <!-- Music Section -->
+            <div class="flex flex-col items-center gap-2">
+              <h3 class="text-lg font-semibold mb-2">Music</h3>
+              <div class="flex flex-wrap gap-4 justify-center">
+                <button onclick="openAwkwardDanceMusic()" class="px-6 py-3 primary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                  Bandcamp
+                </button>
+                <a href="https://open.spotify.com/artist/65XcfOOaVxbZnNlz40DK7i" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"></path>
+                  </svg>
+                  Spotify
+                </a>
+                <a href="https://www.youtube.com/@Windows969" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                  </svg>
+                  YouTube
+                </a>
+              </div>
+            </div>
+
+            <!-- Socials Section -->
+            <div class="flex flex-col items-center gap-2">
+              <h3 class="text-lg font-semibold mb-2">Socials</h3>
+              <div class="flex flex-wrap gap-4 justify-center">
+                <a href="https://x.com/whitegavriel" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                  </svg>
+                  X (Twitter)
+                </a>
+                <a href="https://discord.com/invite/gkmRXx8wjC" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                  Discord
+                </a>
+                <a href="https://www.reddit.com/r/windows96" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/>
+                  </svg>
+                  Reddit
+                </a>
+              </div>
+            </div>
+
+            <!-- Merch Section -->
+            <div class="flex flex-col items-center gap-2">
+              <h3 class="text-lg font-semibold mb-2">Merch</h3>
+              <div class="flex flex-wrap gap-4 justify-center">
+                <a href="https://windows96.bandcamp.com/merch" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                  Bandcamp Store
+                </a>
+                <a href="https://www.100percentelectronica.com/pages/windows-96" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                  </svg>
+                  100% Electronica
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   `;
 
-  // Only add structure if it doesn't exist
-  if (!document.getElementById('loading-overlay')) {
-    document.body.insertAdjacentHTML('afterbegin', requiredStructure);
+  // Latest Album Section (Windows96 only)
+  let featuredAlbumHTML = isWindows96 ? `
+    <section class="relative z-10 py-24 px-6 bg-black/60 backdrop-blur-sm">
+      <div class="max-w-4xl mx-auto">
+        <h3 class="text-3xl font-bold mb-8 glitch text-center" data-text="Latest Album">Latest Album</h3>
+        <div class="flex flex-col items-center text-center mb-8">
+          <div class="album-cover group">
+            <img src="${windows96Albums[0].cover}" alt="${windows96Albums[0].title} Album Art" class="w-full max-w-sm h-auto rounded-xl object-cover transform transition-transform duration-700 group-hover:scale-105">
+            <div class="absolute inset-0 rounded-xl border-2 border-dashed border-white/20 backdrop-blur-sm"></div>
+          </div>
+          <h3 class="text-3xl font-bold mt-4 glitch" data-text="${windows96Albums[0].title.toUpperCase()}">${windows96Albums[0].title.toUpperCase()}</h3>
+          <p class="text-sm text-gray-400 mt-2">Released ${windows96Albums[0].releaseDate}</p>
+        </div>
+        <div class="mb-6">
+          <iframe style="border: 0; width: 100%; height: 120px;" src="${windows96Albums[0].bandcampEmbedUrl}" seamless allow="autoplay; encrypted-media"></iframe>
+        </div>
+      </div>
+    </section>
+  ` : '';
+
+  // Random Album Section (Windows96 only)
+  let randomAlbumHTML = isWindows96 ? `
+    <section id="random-album-section" class="relative z-10 py-24 px-6 bg-black/60 backdrop-blur-sm">
+      <div class="max-w-4xl mx-auto">
+        <h3 class="text-3xl font-bold mb-8 glitch text-center" data-text="Discover More">Discover More</h3>
+      </div>
+    </section>
+  ` : '';
+
+  // Behind the Music Section (includes interviews)
+  let behindTheMusicHTML = `
+    <section class="relative z-10 py-24 px-6">
+      <div class="max-w-4xl mx-auto">
+        <h3 class="text-3xl font-bold mb-8 glitch text-center" data-text="Behind the Music">Behind the Music</h3>
+        <div id="interview-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          ${interviewQuotes.map(quote => `
+            <div class="interview-card p-6 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all">
+              <blockquote class="text-lg mb-4">${quote.quote}</blockquote>
+              <p class="interview-context text-sm">${quote.context}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </section>
+  `;
+
+  // Album Grid Section (YVYY only)
+  let albumGridHTML = !isWindows96 ? `
+    <section class="album-grid-section py-16">
+      <div class="max-w-7xl mx-auto px-6">
+        <h3 class="text-3xl font-bold mb-8 text-center glitch" data-text="DISCOGRAPHY">DISCOGRAPHY</h3>
+        <div class="album-grid">
+          ${albums.map(album => `
+            <div class="embedded-album">
+              <h4 class="album-title">${album.title}</h4>
+              <iframe style="border: 0; width: 100%; height: 120px;" src="${album.bandcampEmbedUrl}" seamless allow="autoplay; encrypted-media"></iframe>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </section>
+  ` : '';
+
+  // Combine all sections
+  artistContent.innerHTML = heroHTML + featuredAlbumHTML + randomAlbumHTML + albumGridHTML + behindTheMusicHTML;
+
+  // Initialize the random album section only for Windows96
+  if (isWindows96) {
+    updateRandomAlbumSection();
   }
 
-  // Initialize the application
-  try {
-    // Add credit line
-    const creditDiv = document.createElement('div');
-    creditDiv.className = 'fixed bottom-4 right-4 text-sm text-white/50 hover:text-white/70 transition-colors duration-300 z-50 pointer-events-none font-light';
-    creditDiv.textContent = 'Windows96 Fan Website by Kiazaki.com';
-    document.body.appendChild(creditDiv);
-
-    // Start the application
-    setActiveArtist('windows96');
+  // Start quote refresh after rendering
     startQuoteRefresh();
-  } catch (error) {
-    console.error('Error during initialization:', error);
+}
+
+function updateTabTitle(album, track) {
+  const baseTitle = 'Windows96';
+  if (album && track) {
+    document.title = `${track.title} - ${album.title} | ${baseTitle}`;
+  } else {
+    document.title = baseTitle;
   }
-});
+}
+
+function updatePlayerBar() {
+  const playerBar = document.getElementById('player-bar');
+  const albums = windows96Albums; // Only use Windows96 albums
+  const album = albums[currentAlbum];
+  const track = album.tracks[currentTrack];
+
+  const playIconPlayerBar = document.getElementById('play-icon');
+  const albumArt = document.getElementById('album-art');
+  const albumName = document.getElementById('album-name');
+  const trackName = document.getElementById('track-name');
+  const artistLabel = document.getElementById('player-artist-label');
+  const trackDuration = document.getElementById('track-duration');
+  const progressBar = document.getElementById('progress-bar');
+  const playButtonPlayerBar = document.getElementById('play-button');
+
+  albumArt.src = album.cover;
+  albumName.textContent = album.title;
+  trackName.textContent = track.title;
+  trackDuration.textContent = track.duration;
+  artistLabel.textContent = activeArtist.toUpperCase();
+
+  playIconPlayerBar.innerHTML = isPlaying 
+    ? '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>' 
+    : '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+
+  const playIconHero = document.getElementById('play-icon-hero');
+  const heroButtonTextElement = playIconHero ? playIconHero.parentElement : null;
+
+  if (playIconHero) {
+    playIconHero.innerHTML = isPlaying 
+      ? '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>' 
+      : '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+  }
+  if (heroButtonTextElement) {
+    heroButtonTextElement.lastChild.textContent = isPlaying ? 'Pause Stream' : 'Listen Now';
+  }
+
+  progressBar.style.width = `${audioProgress}%`;
+  playerBar.classList.add('player-bar-visible');
+}
+
+function updateRandomAlbumSection() {
+  const randomAlbumSection = document.getElementById('random-album-section');
+  const randomAlbum = getRandomAlbum();
+  
+  if (randomAlbumSection) {
+    randomAlbumSection.innerHTML = `
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-black/60 backdrop-blur-md rounded-2xl p-8 border border-white/10">
+          <div class="flex flex-col items-center text-center mb-12">
+            <h3 class="text-3xl font-bold glitch mb-8 text-purple-400" data-text="Album of the Day">Album of the Day</h3>
+            <h4 class="text-2xl font-bold mb-4 text-white/90" data-text="${randomAlbum.title.toUpperCase()}">${randomAlbum.title.toUpperCase()}</h4>
+            <p class="text-sm text-gray-400">Released ${randomAlbum.releaseDate}</p>
+          </div>
+          <div class="mb-16">
+            <iframe style="border: 0; width: 100%; height: 120px;" src="${randomAlbum.bandcampEmbedUrl}" seamless allow="autoplay; encrypted-media"></iframe>
+          </div>
+          <div class="flex justify-center">
+            <button onclick="updateRandomAlbum()" class="group relative px-12 py-6 bg-black/40 text-white text-xl font-bold rounded-xl transition-all duration-500 flex items-center justify-center gap-4 overflow-hidden border border-purple-500/30 hover:border-purple-500/50">
+              <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 group-hover:text-purple-300 transition-colors duration-300">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                <path d="M16 21h5v-5"></path>
+              </svg>
+              <span class="relative z-10 text-purple-200 group-hover:text-white transition-colors duration-300">Randomize Album</span>
+              <div class="absolute inset-0 border-2 border-purple-500/20 rounded-xl group-hover:border-purple-500/40 transition-colors duration-500"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Add function to open album on Bandcamp
+function openAlbumOnBandcamp(embedUrl) {
+  const bandcampUrl = embedUrl.replace('/EmbeddedPlayer/', '/');
+  window.open(bandcampUrl, '_blank');
+  updateSystemStatus('Opening album on Bandcamp...');
+}
+
+// Add new function to open latest album
+function openAwkwardDanceMusic() {
+  window.open('https://windows96.bandcamp.com/album/awkward-dance-music', '_blank');
+  updateSystemStatus('Opening Awkward Dance Music on Bandcamp...');
+}
+
+function updateRandomAlbum() {
+  const randomAlbumSection = document.getElementById('random-album-section');
+  if (randomAlbumSection) {
+    updateRandomAlbumSection();
+  }
+}
+
+// Update the getRandomAlbum function to include all albums
+function getRandomAlbum() {
+  let randomIndex;
+  do {
+    randomIndex = Math.floor(Math.random() * windows96Albums.length); // Include all albums
+  } while (randomIndex === lastRandomAlbumIndex);
+  
+  lastRandomAlbumIndex = randomIndex;
+  return windows96Albums[randomIndex];
+}
 
 function showLoading() {
   const loadingOverlay = document.getElementById('loading-overlay');
@@ -483,7 +825,7 @@ function handleNextTrack() {
   if (trackTimer) {
     clearTimeout(trackTimer);
   }
-  const albums = activeArtist === 'windows96' ? windows96Albums : yvyyAlbums;
+  const albums = windows96Albums; // Only use Windows96 albums
   
   // Get a random album index different from the current one
   let nextAlbumIndex;
@@ -512,7 +854,7 @@ function handlePrevTrack() {
   if (trackTimer) {
     clearTimeout(trackTimer);
   }
-  const albums = activeArtist === 'windows96' ? windows96Albums : yvyyAlbums;
+  const albums = windows96Albums; // Only use Windows96 albums
   
   // Get a random album index different from the current one
   let prevAlbumIndex;
@@ -610,15 +952,10 @@ function updateQuote() {
   description.style.opacity = '0';
   
   setTimeout(() => {
-    description.textContent = newQuote;
-    // Add fade in effect
+    // Start typing animation
+    typeWriter(description, newQuote);
     description.style.opacity = '1';
-    
-    // Show notification for Windows96 quotes
-    if (isWindows96) {
-      showNotification('New quote loaded: ' + newQuote.replace(/"/g, ''));
-    }
-  }, 500); // Half second transition
+  }, 500);
 }
 
 function startQuoteRefresh() {
@@ -634,379 +971,149 @@ function startQuoteRefresh() {
   updateQuote();
 }
 
-function renderArtistContent() {
-  let artistContent = document.getElementById('artist-content');
-  if (!artistContent) {
-    console.warn('Artist content element not found - creating one');
-    artistContent = document.createElement('div');
-    artistContent.id = 'artist-content';
-    document.body.appendChild(artistContent);
+// Add cursor particle effect
+function initCursorParticles() {
+  const container = document.createElement('div');
+  container.className = 'cursor-particles';
+  document.body.appendChild(container);
+
+  const particles = [];
+  const maxParticles = 8; // Reduced from 20 to 8
+  let mouseX = 0;
+  let mouseY = 0;
+  let isMobile = window.innerWidth <= 768;
+  let rafId = null;
+
+  // Only create particles if not on mobile
+  if (!isMobile) {
+    // Create initial particles
+    for (let i = 0; i < maxParticles; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'cursor-particle';
+      container.appendChild(particle);
+      particles.push({
+        element: particle,
+        x: 0,
+        y: 0,
+        delay: i * 0.1 // Increased delay between particles
+      });
+    }
   }
 
-  const albums = activeArtist === 'windows96' ? windows96Albums : yvyyAlbums;
-  const isWindows96 = activeArtist === 'windows96';
+  // Throttled mouse move handler
+  let lastMove = 0;
+  const throttleDelay = 16; // ~60fps
 
-  // Create background elements if they don't exist
-  let bgContainer = document.getElementById('background-elements');
-  if (!bgContainer) {
-    console.warn('Background container not found - creating one');
-    bgContainer = document.createElement('div');
-    bgContainer.id = 'background-elements';
-    document.body.insertBefore(bgContainer, document.body.firstChild);
+  document.addEventListener('mousemove', (e) => {
+    const now = Date.now();
+    if (now - lastMove >= throttleDelay) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      lastMove = now;
+    }
+  });
+
+  // Optimized animation loop
+  function animate() {
+    if (!isMobile) {
+      particles.forEach((particle, index) => {
+        const delay = particle.delay;
+        const targetX = mouseX;
+        const targetY = mouseY;
+
+        // Simplified movement calculation
+        particle.x += (targetX - particle.x) * 0.15;
+        particle.y += (targetY - particle.y) * 0.15;
+
+        // Batch DOM updates
+        requestAnimationFrame(() => {
+          particle.element.style.transform = `translate(${particle.x}px, ${particle.y}px)`;
+          particle.element.style.opacity = '0.3';
+        });
+
+        // Simplified fade out
+        if (Math.abs(targetX - particle.x) < 2 && Math.abs(targetY - particle.y) < 2) {
+          particle.element.style.opacity = '0';
+        }
+      });
+    }
+    rafId = requestAnimationFrame(animate);
   }
 
-  // Create player bar if it doesn't exist
-  let playerBar = document.getElementById('player-bar');
-  if (!playerBar) {
-    console.warn('Player bar not found - creating one');
-    playerBar = document.createElement('div');
-    playerBar.id = 'player-bar';
-    playerBar.className = 'player-bar';
-    document.body.appendChild(playerBar);
+  // Start animation only if not on mobile
+  if (!isMobile) {
+    animate();
   }
 
-  const title = isWindows96 ? 'Windows96' : 'YVYY';
-  const subtitle = isWindows96 ? '' : '';
-  const randomQuote = isWindows96 
-    ? windows96Quotes[Math.floor(Math.random() * windows96Quotes.length)]
-    : "A sonic abyss of raw distortion, metaphysical chaos, and blackened rhythms. Embrace the void where industrial beats and existential dread converge.";
+  // Cleanup function
+  return () => {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+    }
+    container.remove();
+  };
+}
 
-  // Show notification for Windows96 quotes
-  if (isWindows96) {
-    showNotification('New quote loaded: ' + randomQuote.replace(/"/g, ''));
+// Initialize cursor particles when the document is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Ensure basic HTML structure exists
+  if (!document.body) {
+    console.error('Document body not found');
+    return;
   }
 
-  let heroHTML = `
-    <section class="hero-section">
-      <div class="max-w-4xl mx-auto">
-        <div class="flex flex-col items-center text-center">
-          <!-- Artist Switching Buttons -->
-          <div class="artist-switcher mb-12 w-full max-w-2xl">
-            <div class="flex gap-6 justify-center">
-              <button onclick="setActiveArtist('windows96')" class="group relative flex-1 px-8 py-6 bg-black/40 text-white text-2xl font-bold rounded-xl transition-all duration-500 flex items-center justify-center gap-4 overflow-hidden border ${activeArtist === 'windows96' ? 'border-purple-500/50' : 'border-purple-500/20'} hover:border-purple-500/50">
-                <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 ${activeArtist === 'windows96' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent ${activeArtist === 'windows96' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
-                <svg class="w-8 h-8 text-purple-400 ${activeArtist === 'windows96' ? 'text-purple-300' : 'group-hover:text-purple-300'} transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" class="world-outline"/>
-                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" class="world-grid"/>
-                </svg>
-                <span class="relative z-10 ${activeArtist === 'windows96' ? 'text-white' : 'text-purple-200 group-hover:text-white'} transition-colors duration-300">Windows96</span>
-              </button>
-              <button onclick="setActiveArtist('yvyy')" class="group relative flex-1 px-8 py-6 bg-black/40 text-white text-2xl font-bold rounded-xl transition-all duration-500 flex items-center justify-center gap-4 overflow-hidden border ${activeArtist === 'yvyy' ? 'border-purple-500/50' : 'border-purple-500/20'} hover:border-purple-500/50">
-                <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 ${activeArtist === 'yvyy' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent ${activeArtist === 'yvyy' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-500"></div>
-                <svg class="w-8 h-8 text-purple-400 ${activeArtist === 'yvyy' ? 'text-purple-300' : 'group-hover:text-purple-300'} transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" class="moon-outline"/>
-                  <path d="M12 3v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M17 7l-1.4 1.4M5.6 18.4l1.4-1.4" class="moon-rays"/>
-                </svg>
-                <span class="relative z-10 ${activeArtist === 'yvyy' ? 'text-white' : 'text-purple-200 group-hover:text-white'} transition-colors duration-300">YVYY</span>
-              </button>
-            </div>
+  // Add mobile-specific meta tags
+  const metaViewport = document.querySelector('meta[name="viewport"]');
+  if (metaViewport) {
+    metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+  }
+
+  // Add touch event handling
+  document.addEventListener('touchstart', function() {}, {passive: true});
+  
+  // Prevent double-tap zoom on buttons
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(button => {
+    button.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      this.click();
+    });
+  });
+
+  // Create basic structure if it doesn't exist
+  const requiredStructure = `
+    <div id="loading-overlay" class="loading-overlay"></div>
+    <div id="system-status" class="system-status">
+      <div class="status-text"></div>
           </div>
-
-          <div class="world-icon-container mb-8">
-            ${isWindows96 ? `
-              <svg class="world-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" class="world-outline"/>
-                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" class="world-grid"/>
-                <path d="M12 2v20" class="world-grid"/>
-                <path d="M2 12h20" class="world-grid"/>
-              </svg>
-            ` : `
-              <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" class="moon-outline"/>
-                <path d="M12 3v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M17 7l-1.4 1.4M5.6 18.4l1.4-1.4" class="moon-rays"/>
-              </svg>
-            `}
-          </div>
-          <h2 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-            <span class="block glitch" data-text="${title.toUpperCase()}">${title.toUpperCase()}</span>
-            <span class="text-xs uppercase tracking-[0.2em] mt-2 block album-subtitle">${subtitle}</span>
-          </h2>
-          <p class="description transition-opacity duration-500">${randomQuote}</p>
-          <div class="action-buttons flex flex-col gap-6 justify-center animate-fade-in-up delay-400">
-            <!-- Music Section -->
-            <div class="flex flex-col items-center gap-2">
-              <h3 class="text-lg font-semibold mb-2">Music</h3>
-              <div class="flex flex-wrap gap-4 justify-center">
-                <button onclick="openAwkwardDanceMusic()" class="px-6 py-3 primary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                  </svg>
-                  Bandcamp
-                </button>
-                <a href="https://open.spotify.com/artist/65XcfOOaVxbZnNlz40DK7i" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"></path>
-                  </svg>
-                  Spotify
-                </a>
-                <a href="https://www.youtube.com/@Windows969" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
-                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
-                  </svg>
-                  YouTube
-                </a>
-        </div>
-            </div>
-
-            <!-- Socials Section -->
-            <div class="flex flex-col items-center gap-2">
-              <h3 class="text-lg font-semibold mb-2">Socials</h3>
-              <div class="flex flex-wrap gap-4 justify-center">
-                <a href="https://x.com/whitegavriel" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-            </svg>
-                  X (Twitter)
-                </a>
-                <a href="https://discord.com/invite/gkmRXx8wjC" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                  </svg>
-                  Discord
-          </a>
-        </div>
-      </div>
-
-            <!-- Merch Section -->
-            <div class="flex flex-col items-center gap-2">
-              <h3 class="text-lg font-semibold mb-2">Merch</h3>
-              <div class="flex flex-wrap gap-4 justify-center">
-                <a href="https://windows96.bandcamp.com/merch" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  Bandcamp Store
-                </a>
-                <a href="https://www.100percentelectronica.com/pages/windows-96" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                  </svg>
-                  100% Electronica
-                </a>
-    </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div id="background-elements"></div>
+    <div id="artist-content"></div>
+    <div id="player-bar" class="player-bar"></div>
   `;
 
-  // Latest Album Section (Windows96 only)
-  let featuredAlbumHTML = isWindows96 ? `
-    <section class="relative z-10 py-24 px-6 bg-black/60 backdrop-blur-sm">
-      <div class="max-w-4xl mx-auto">
-        <h3 class="text-3xl font-bold mb-8 glitch text-center" data-text="Latest Album">Latest Album</h3>
-          <div class="flex flex-col items-center text-center mb-8">
-            <div class="album-cover group">
-            <img src="${windows96Albums[0].cover}" alt="${windows96Albums[0].title} Album Art" class="w-full max-w-sm h-auto rounded-xl object-cover transform transition-transform duration-700 group-hover:scale-105">
-              <div class="absolute inset-0 rounded-xl border-2 border-dashed border-white/20 backdrop-blur-sm"></div>
-            </div>
-          <h3 class="text-3xl font-bold mt-4 glitch" data-text="${windows96Albums[0].title.toUpperCase()}">${windows96Albums[0].title.toUpperCase()}</h3>
-          <p class="text-sm text-gray-400 mt-2">Released ${windows96Albums[0].releaseDate}</p>
-        </div>
-        <div class="mb-6">
-          <iframe style="border: 0; width: 100%; height: 120px;" src="${windows96Albums[0].bandcampEmbedUrl}" seamless allow="autoplay; encrypted-media"></iframe>
-        </div>
-      </div>
-    </section>
-  ` : '';
-
-  // Random Album Section (Windows96 only)
-  let randomAlbumHTML = isWindows96 ? `
-    <section id="random-album-section" class="relative z-10 py-24 px-6 bg-black/60 backdrop-blur-sm">
-      <div class="max-w-4xl mx-auto">
-        <h3 class="text-3xl font-bold mb-8 glitch text-center" data-text="Discover More">Discover More</h3>
-      </div>
-    </section>
-  ` : '';
-
-  // Yvyy Albums Section
-  let yvyyAlbumsHTML = !isWindows96 ? `
-    <section class="relative z-10 py-24 px-6 bg-black/60 backdrop-blur-sm">
-    <div class="max-w-4xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          ${yvyyAlbums.map(album => `
-            <div class="bg-black/60 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-              <div class="flex flex-col items-center text-center">
-                <div class="album-cover group mb-4">
-                  <img src="${album.cover}" alt="${album.title} Album Art" class="w-full max-w-sm h-auto rounded-xl object-cover transform transition-transform duration-700 group-hover:scale-105">
-        </div>
-                <h4 class="text-xl font-bold" data-text="${album.title.toUpperCase()}">${album.title.toUpperCase()}</h4>
-            <p class="text-sm text-gray-400 mt-2">Released ${album.releaseDate}</p>
-        </div>
-              <div class="mt-4">
-                <iframe style="border: 0; width: 100%; height: 120px;" src="${album.bandcampEmbedUrl}" seamless allow="autoplay; encrypted-media"></iframe>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </section>
-  ` : '';
-
-  // Behind the Music Section (includes interviews)
-  let behindTheMusicHTML = `
-    <section class="relative z-10 py-24 px-6">
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-black/80 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-2xl">
-          <h3 class="text-3xl font-bold mb-12 glitch text-center" data-text="Behind the Music">Behind the Music</h3>
-          <div id="interview-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            ${interviewQuotes.slice(0, 6).map(q => `
-              <div class="interview-card bg-black/40 rounded-xl p-6 border border-white/10 transition-all hover:scale-105">
-                <blockquote class="italic text-gray-300/90">"${q.quote}"</blockquote>
-                <div class="mt-4 flex flex-col gap-2">
-                  <p class="interview-context text-sm">${q.context}</p>
-                  <a href="${q.source}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                      <polyline points="15 3 21 3 21 9"></polyline>
-                      <line x1="10" y1="14" x2="21" y2="3"></line>
-            </svg>
-                    Read full interview
-          </a>
-        </div>
-      </div>
-            `).join('')}
-    </div>
-        </div>
-      </div>
-    </section>
-  `;
-
-  artistContent.innerHTML = heroHTML + featuredAlbumHTML + randomAlbumHTML + yvyyAlbumsHTML + behindTheMusicHTML;
-
-  // Initialize the random album section only for Windows96
-  if (isWindows96) {
-    updateRandomAlbumSection();
+  // Only add structure if it doesn't exist
+  if (!document.getElementById('loading-overlay')) {
+    document.body.insertAdjacentHTML('afterbegin', requiredStructure);
   }
 
-  // Start quote refresh after rendering
-  startQuoteRefresh();
-}
+  // Initialize the application
+  try {
+    // Add credit line
+    const creditDiv = document.createElement('div');
+    creditDiv.className = 'fixed bottom-4 right-4 text-sm text-white/50 hover:text-white/70 transition-colors duration-300 z-50 pointer-events-none font-light';
+    creditDiv.textContent = 'Windows96 Fan Website by Kiazaki.com';
+    document.body.appendChild(creditDiv);
 
-function updateTabTitle(album, track) {
-  const baseTitle = 'Windows96';
-  if (album && track) {
-    document.title = `${track.title} - ${album.title} | ${baseTitle}`;
-  } else {
-    document.title = baseTitle;
+    // Start the application
+    setActiveArtist('windows96');
+    startQuoteRefresh();
+
+    // Add mobile-specific event listeners
+    setupMobileEventListeners();
+
+    // Initialize cursor particles
+    initCursorParticles();
+  } catch (error) {
+    console.error('Error during initialization:', error);
   }
-}
-
-function updatePlayerBar() {
-  const playerBar = document.getElementById('player-bar');
-  const albums = activeArtist === 'windows96' ? windows96Albums : yvyyAlbums;
-  const album = albums[currentAlbum];
-  const track = album.tracks[currentTrack];
-
-  const playIconPlayerBar = document.getElementById('play-icon');
-  const albumArt = document.getElementById('album-art');
-  const albumName = document.getElementById('album-name');
-  const trackName = document.getElementById('track-name');
-  const artistLabel = document.getElementById('player-artist-label');
-  const trackDuration = document.getElementById('track-duration');
-  const progressBar = document.getElementById('progress-bar');
-  const playButtonPlayerBar = document.getElementById('play-button');
-
-  albumArt.src = album.cover;
-  albumName.textContent = album.title;
-  trackName.textContent = track.title;
-  trackDuration.textContent = track.duration;
-  artistLabel.textContent = activeArtist.toUpperCase();
-
-  playIconPlayerBar.innerHTML = isPlaying 
-    ? '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>' 
-    : '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
-
-  const playIconHero = document.getElementById('play-icon-hero');
-  const heroButtonTextElement = playIconHero ? playIconHero.parentElement : null;
-
-  if (playIconHero) {
-    playIconHero.innerHTML = isPlaying 
-      ? '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>' 
-      : '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
-  }
-  if (heroButtonTextElement) {
-    heroButtonTextElement.lastChild.textContent = isPlaying ? 'Pause Stream' : 'Listen Now';
-  }
-
-  progressBar.style.width = `${audioProgress}%`;
-  playerBar.classList.add('player-bar-visible');
-}
-
-function updateRandomAlbumSection() {
-  const randomAlbumSection = document.getElementById('random-album-section');
-  const randomAlbum = getRandomAlbum();
-  
-  if (randomAlbumSection) {
-    randomAlbumSection.innerHTML = `
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-black/60 backdrop-blur-md rounded-2xl p-8 border border-white/10">
-          <div class="flex flex-col items-center text-center mb-12">
-            <h3 class="text-3xl font-bold glitch mb-8 text-purple-400" data-text="Album of the Day">Album of the Day</h3>
-            <h4 class="text-2xl font-bold mb-4 text-white/90" data-text="${randomAlbum.title.toUpperCase()}">${randomAlbum.title.toUpperCase()}</h4>
-            <p class="text-sm text-gray-400">Released ${randomAlbum.releaseDate}</p>
-          </div>
-          <div class="mb-16">
-            <iframe style="border: 0; width: 100%; height: 120px;" src="${randomAlbum.bandcampEmbedUrl}" seamless allow="autoplay; encrypted-media"></iframe>
-          </div>
-          <div class="flex justify-center">
-            <button onclick="updateRandomAlbum()" class="group relative px-12 py-6 bg-black/40 text-white text-xl font-bold rounded-xl transition-all duration-500 flex items-center justify-center gap-4 overflow-hidden border border-purple-500/30 hover:border-purple-500/50">
-              <div class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 group-hover:text-purple-300 transition-colors duration-300">
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path d="M3 3v5h5"></path>
-                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-                <path d="M16 21h5v-5"></path>
-              </svg>
-              <span class="relative z-10 text-purple-200 group-hover:text-white transition-colors duration-300">Randomize Album</span>
-              <div class="absolute inset-0 border-2 border-purple-500/20 rounded-xl group-hover:border-purple-500/40 transition-colors duration-500"></div>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-// Add function to open album on Bandcamp
-function openAlbumOnBandcamp(embedUrl) {
-  const bandcampUrl = embedUrl.replace('/EmbeddedPlayer/', '/');
-  window.open(bandcampUrl, '_blank');
-  updateSystemStatus('Opening album on Bandcamp...');
-}
-
-// Add new function to open latest album
-function openAwkwardDanceMusic() {
-  window.open('https://windows96.bandcamp.com/album/awkward-dance-music', '_blank');
-  updateSystemStatus('Opening Awkward Dance Music on Bandcamp...');
-}
-
-function updateRandomAlbum() {
-  const randomAlbumSection = document.getElementById('random-album-section');
-  if (randomAlbumSection) {
-    updateRandomAlbumSection();
-  }
-}
-
-// Update the getRandomAlbum function to include all albums
-function getRandomAlbum() {
-  let randomIndex;
-  do {
-    randomIndex = Math.floor(Math.random() * windows96Albums.length); // Include all albums
-  } while (randomIndex === lastRandomAlbumIndex);
-  
-  lastRandomAlbumIndex = randomIndex;
-  return windows96Albums[randomIndex];
-}
+});
