@@ -11,6 +11,10 @@
   --gray-300: #d1d5db;
   --gray-300-rgb: 209, 213, 219;
 
+  a {
+  text-decoration: none;
+}
+  
   /* Windows96 Specific Colors */
   --win96-pink-300: #f87171;
   --win96-pink-400: #ec4899;
