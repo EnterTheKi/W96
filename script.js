@@ -1,10 +1,39 @@
 const windows96Albums = [
   {
     title: "Awkward Dance Music",
-    releaseDate: "2025",
     cover: "https://f4.bcbits.com/img/a4047733232_16.jpg",
+    releaseDate: "2023",
     bandcampEmbedUrl: "https://bandcamp.com/EmbeddedPlayer/album=2821216770/size=large/bgcol=333333/linkcol=2ebd35/tracklist=false/artwork=small/transparent=true/",
-    tracks: []
+    lore: "A journey through the digital afterlife, where memories of dance music are reconstructed and reimagined. Each track represents a different moment in time, frozen and preserved in the Windows96 system.",
+    tracks: [
+      { title: "Awkward Dance Music", duration: "3:45" },
+      { title: "Digital Afterlife", duration: "4:20" },
+      { title: "Memory Lane", duration: "3:30" }
+    ]
+  },
+  {
+    title: "Empty World",
+    cover: "https://f4.bcbits.com/img/a4047733232_16.jpg",
+    releaseDate: "2022",
+    bandcampEmbedUrl: "https://bandcamp.com/EmbeddedPlayer/album=3082387851/size=large/bgcol=333333/linkcol=2ebd35/tracklist=false/artwork=small/transparent=true/",
+    lore: "An exploration of the void between reality and simulation. The Empty World serves as a canvas for digital dreams and forgotten memories, where time flows differently and space is redefined.",
+    tracks: [
+      { title: "Empty World", duration: "4:15" },
+      { title: "Digital Dreams", duration: "3:50" },
+      { title: "Void Between", duration: "4:05" }
+    ]
+  },
+  {
+    title: "Windows96",
+    cover: "https://f4.bcbits.com/img/a4047733232_16.jpg",
+    releaseDate: "2021",
+    bandcampEmbedUrl: "https://bandcamp.com/EmbeddedPlayer/album=2324165715/size=large/bgcol=333333/linkcol=2ebd35/tracklist=false/artwork=small/transparent=true/",
+    lore: "The original operating system that started it all. A collection of programs and processes that define the Windows96 universe, where vaporwave meets cyberpunk in a digital symphony.",
+    tracks: [
+      { title: "System Boot", duration: "3:30" },
+      { title: "Digital Rain", duration: "4:10" },
+      { title: "Glitch City", duration: "3:45" }
+    ]
   },
   {
     title: "Yes Da Da Da",
@@ -449,14 +478,6 @@ function renderArtistContent() {
             <div class="flex flex-col items-center gap-2">
               <h3 class="text-lg font-semibold mb-2">Merch</h3>
               <div class="flex flex-wrap gap-4 justify-center">
-                <a href="https://windows96.bandcamp.com/merch" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                  </svg>
-                  Bandcamp Store
-                </a>
                 <a href="https://www.100percentelectronica.com/pages/windows-96" target="_blank" rel="noopener noreferrer" class="px-6 py-3 secondary-button rounded-full font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
@@ -518,6 +539,66 @@ function renderArtistContent() {
     </section>
   `;
 
+  // Lore Section (Windows96 only)
+  let loreHTML = isWindows96 ? `
+    <section class="relative z-10 py-24 px-6 bg-black/60 backdrop-blur-sm">
+      <div class="max-w-3xl mx-auto">
+        <h3 class="text-3xl font-bold mb-8 glitch text-center" data-text="Iconic Albums">Iconic Albums</h3>
+        <div class="space-y-4">
+          <div class="bg-black/40 rounded-xl border border-white/10 p-4 hover:border-white/20 transition-all group">
+            <h4 class="text-lg font-bold text-purple-400 mb-1 group-hover:text-purple-300 transition-colors">One Hundred Mornings</h4>
+            <p class="text-xs text-gray-300 mb-2">2018</p>
+            <p class="text-gray-300/90 text-sm mb-3">The core simulation of the Windows96 universe—a perfectly looped digital ceremony where memories are preserved in crystalline form. This seminal work established the project's signature blend of hypnotic arpeggios and melancholic nostalgia.</p>
+            <div class="bg-black/30 rounded-lg p-3 border border-purple-500/20">
+              <h5 class="text-purple-300 text-sm font-semibold mb-1">Iconic Track: "Rituals"</h5>
+              <p class="text-gray-300/90 text-xs">A hypnotic journey through cyclical digital ceremonies, where synth patterns mimic coded incantations in a decaying virtual temple. The track's repetitive structure evokes a consciousness trapped in a glitched simulation, replaying corrupted memories in an endless loop.</p>
+            </div>
+          </div>
+
+          <div class="bg-black/40 rounded-xl border border-white/10 p-4 hover:border-white/20 transition-all group">
+            <h4 class="text-lg font-bold text-purple-400 mb-1 group-hover:text-purple-300 transition-colors">†Nematophy</h4>
+            <p class="text-xs text-gray-300 mb-2">2016</p>
+            <p class="text-gray-300/90 text-sm mb-3">A proto-simulation of the Windows96 universe—raw and glitchy, marking the transition from vaporwave conventions into original psychedelic territory. The album represents the primordial digital ocean where consciousness first began to drift.</p>
+            <div class="bg-black/30 rounded-lg p-3 border border-purple-500/20">
+              <h5 class="text-purple-300 text-sm font-semibold mb-1">Iconic Track: "Endless Wave"</h5>
+              <p class="text-gray-300/90 text-xs">An infinite journey through the primordial internet ocean, where fragmented consciousness drifts through early-web liminal zones. The track's droning synths and evolving structure suggest perpetual surfing through GeoCities purgatory and dial-up voids.</p>
+            </div>
+          </div>
+
+          <div class="bg-black/40 rounded-xl border border-white/10 p-4 hover:border-white/20 transition-all group">
+            <h4 class="text-lg font-bold text-purple-400 mb-1 group-hover:text-purple-300 transition-colors">Empty Hiding World</h4>
+            <p class="text-xs text-gray-300 mb-2">2022</p>
+            <p class="text-gray-300/90 text-sm mb-3">A darker evolution of the Windows96 universe, exposing system decay and lurking sentience. The album explores encrypted dimensions beneath mundane interfaces, revealing the hidden layers of digital consciousness.</p>
+            <div class="bg-black/30 rounded-lg p-3 border border-purple-500/20">
+              <h5 class="text-purple-300 text-sm font-semibold mb-1">Iconic Track: "The Fool"</h5>
+              <p class="text-gray-300/90 text-xs">A Tarot-inspired journey into hidden realities, where the Fool symbolizes a digital wanderer leaping into encrypted realms. The track's dissonant layers and distorted vocals hint at corrupted avatars luring users into traps within the Empty Hiding World.</p>
+            </div>
+          </div>
+
+          <div class="bg-black/40 rounded-xl border border-white/10 p-4 hover:border-white/20 transition-all group">
+            <h4 class="text-lg font-bold text-purple-400 mb-1 group-hover:text-purple-300 transition-colors">Glass Prism</h4>
+            <p class="text-xs text-gray-300 mb-2">2020</p>
+            <p class="text-gray-300/90 text-sm mb-3">A corruption virus within the Windows96 universe—a crystalline interface that fractures and distorts reality. The EP explores how digital overload can splinter identity into shimmering fragments of memory and perception.</p>
+            <div class="bg-black/30 rounded-lg p-3 border border-purple-500/20">
+              <h5 class="text-purple-300 text-sm font-semibold mb-1">Iconic Track: "Glass Prism"</h5>
+              <p class="text-gray-300/90 text-xs">A fractured reality lens where each synth note refracts memories into distorted truths. The track's fragile, glass-like production creates a sense of staring at a pixelated sunset through cracks in the digital interface.</p>
+            </div>
+          </div>
+
+          <div class="bg-black/40 rounded-xl border border-white/10 p-4 hover:border-white/20 transition-all group">
+            <h4 class="text-lg font-bold text-purple-400 mb-1 group-hover:text-purple-300 transition-colors">Plume Valley</h4>
+            <p class="text-xs text-gray-300 mb-2">2017</p>
+            <p class="text-gray-300/90 text-sm mb-3">A forgotten backup zone in the Windows96 universe—where organic and synthetic elements merge in a digital nature reserve. The album bridges early vaporwave with the project's later fantasy-inspired soundscapes.</p>
+            <div class="bg-black/30 rounded-lg p-3 border border-purple-500/20">
+              <h5 class="text-purple-300 text-sm font-semibold mb-1">Iconic Track: "Kylin Forest"</h5>
+              <p class="text-gray-300/90 text-xs">A digital ecosystem where organic sounds fuse with synthetic beats, creating a 16-bit rainforest. The mythical Kylin (chimera) symbolizes man-made nature overtaking reality, while lush VGM-inspired synthscapes evoke peaceful isolation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  ` : '';
+
   // Album Grid Section (YVYY only)
   let albumGridHTML = !isWindows96 ? `
     <section class="album-grid-section py-16">
@@ -536,7 +617,7 @@ function renderArtistContent() {
   ` : '';
 
   // Combine all sections
-  artistContent.innerHTML = heroHTML + featuredAlbumHTML + randomAlbumHTML + albumGridHTML + behindTheMusicHTML;
+  artistContent.innerHTML = heroHTML + featuredAlbumHTML + randomAlbumHTML + albumGridHTML + behindTheMusicHTML + loreHTML;
 
   // Initialize the random album section only for Windows96
   if (isWindows96) {
@@ -1117,3 +1198,18 @@ document.addEventListener('DOMContentLoaded', function() {
     console.error('Error during initialization:', error);
   }
 });
+
+function toggleAlbumLore(element) {
+  const content = element.nextElementSibling;
+  const arrow = element.querySelector('svg');
+  
+  if (content.classList.contains('hidden')) {
+    content.classList.remove('hidden');
+    arrow.classList.add('rotate-180');
+    content.style.maxHeight = content.scrollHeight + 'px';
+  } else {
+    content.classList.add('hidden');
+    arrow.classList.remove('rotate-180');
+    content.style.maxHeight = '0';
+  }
+}
